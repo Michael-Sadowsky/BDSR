@@ -1,0 +1,12 @@
+Plan
+Create two tables:
+	One for individual tweets
+		Take unique tweet cases and feed info into a table
+		Have tweet identifier and other tweet level variables
+		Have user identifier to link back to users
+	One for users
+		Take unique user cases and feed info into a table
+		Have user identifier to link to tweets
+		Have other user level variables
+			Since these tweets are all over a sort timeframe, treat user statistics as fixed, taking the user statistics from the tweet with the largest user_statuses_count
+

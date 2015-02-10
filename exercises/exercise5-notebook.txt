@@ -1,0 +1,66 @@
+select count(*) from users
+#The above generates a count distinct users since my file 
+#only contains distinct users. The count is 297569
+
+select avg(count) from 
+(select count(*) as count from tweets
+group by twitter_user_twitter_id having count(*)>1)
+#the sql above generates the average count for users who have more than 1 tweets
+
+select avg(tweet_hashtag_mention_count), max(tweet_hashtag_mention_count) from tweets
+#getting the average, 0.299, and max, 30, number of hashtags in tweets
+
+select count(*) from tweets where tweet_hashtag_mention_count>0
+#getting the number of tweents where there is at least 1 hashtag, 55716
+
+select avg(min(tweet_hashtag_mention_count,1))*100 from tweets
+#getting the average number of tweets where the hashtag count isn't 0
+#(count all those with at least 1 hashtag as 1)
+#This figure is 16.774
+
+select avg(tweet_user_mention_count), max(tweet_user_mention_count) from tweets
+#getting the average, 0.798, and max, 15, number of user mentions
+
+select count(*) from tweets where tweet_user_mention_count>0
+#207681 with one mention or more
+
+select avg(min(tweet_user_mention_count,1))*100 from tweets
+#62.525% of the overall data has user mentions
+
+#Note the domains seem to be a bit screwed up, but here is the code to get a 
+#printed dictionary of the domain names, such as they are:
+import sqlite3
+import pandas as pd
+import re
+conn = sqlite3.connect('twitter.sqlite') #connecting to sqlite3
+cursor = conn.cursor()
+cursor.execute("select tweet_display_urls_mentioned from tweets where tweet_display_urls_mentioned is not null")
+urls={}
+for element in cursor:
+	url=re.findall('^(.*?)(?:%2F|$)',str(element[0]))[0] #this regex gets the first occurance of a any group that occurs before either 2%F ofr the end of the line
+	if url not in urls.keys():
+		urls[url]=1
+	if url in urls.keys():
+		urls[url]=urls[url]+1
+print sorted(urls.iteritems(), key=lambda (k,v): (v,k),reverse=True)[0:10] #print the 10 most common domains
+#	bit.ly: 7170
+#	goo.gl: 5188
+#	vine.co: 3945
+#	instagram.com: 3504
+#	fb.me: 3191
+#	du3a.org: 2755
+#	youtu.be: 2502
+#	merumo.info: 2035
+#	ift.tt: 1954
+#	pic.twitter.com: 1922
+
+select count(*) from tweets where tweet_url_count>0
+#81665 with at least one url
+
+select avg(min(tweet_url_count,1))*100 from tweets
+#24.586% of the overall data has t least one url
+
+#The main issues I see are with the tweet_place and the various string url fields 
+	#The places appear to have a bunch of junk surrouning the actual location
+		#It needs cleaning
+	#The URL fields seem to have some strange character patterns in them (see the links above)
